@@ -2,3 +2,24 @@
 	margin: 0;
 	padding: 0;
 }
+
+.restaurants {
+	margin: 10px;
+	float: left;
+	text-align: center;
+	width: 40%;
+}
+
+.movies {
+	margin: 10px;
+	float: right;
+	text-align: center;
+	width: 40%;
+}
+
+#search {
+	margin: 0 auto;
+	text-align: center;
+	float: left;
+	width: 10%;
+}

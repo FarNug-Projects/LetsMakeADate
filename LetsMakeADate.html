@@ -7,7 +7,185 @@
 
 	<!-- Import jQuery -->
 	<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+	<!-- Needed in order to authorize Yelp search requests -->
+	<script type="text/javascript" src="http://oauth.googlecode.com/svn/code/javascript/oauth.js"></script>
+    <script type="text/javascript" src="http://oauth.googlecode.com/svn/code/javascript/sha1.js"></script>
+	
+	<script type="text/javascript">
+            var auth = {
+                //
+                // Update with your auth tokens.
+                //
+                consumerKey : "I0ePdTYpPAm6T-0YMH0s0Q",
+                consumerSecret : "laiD-H9gcav3J0-Jw5NW0ZEQRA0",
+                accessToken : "Nh-qi9qi0AzmNEX567s58c7HCKur8qf7",
+                // This example is a proof of concept, for how to use the Yelp v2 API with javascript.
+                // You wouldn't actually want to expose your access token secret like this in a real application.
+                accessTokenSecret : "wNfGJDHegLtbThWXTW-UsMbEp_U",
+                serviceProvider : {
+                    signatureMethod : "HMAC-SHA1"
+                }
+            };
+
+            var terms = 'food';
+            var near = 'San+Francisco';
+
+            var accessor = {
+                consumerSecret : auth.consumerSecret,
+                tokenSecret : auth.accessTokenSecret
+            };
+            parameters = [];
+            parameters.push(['term', terms]);
+            parameters.push(['location', near]);
+            parameters.push(['callback', 'cb']);
+            parameters.push(['oauth_consumer_key', auth.consumerKey]);
+            parameters.push(['oauth_consumer_secret', auth.consumerSecret]);
+            parameters.push(['oauth_token', auth.accessToken]);
+            parameters.push(['oauth_signature_method', 'HMAC-SHA1']);
+
+            var message = {
+                'action' : 'http://api.yelp.com/v2/search',
+                'method' : 'GET',
+                'parameters' : parameters
+            };
+
+            OAuth.setTimestampAndNonce(message);
+            OAuth.SignatureMethod.sign(message, accessor);
+
+            var parameterMap = OAuth.getParameterMap(message.parameters);
+            console.log("ParameterMap! " + parameterMap);
+
+            $.ajax({
+                'url' : message.action,
+                'data' : parameterMap,
+                'dataType' : 'jsonp',
+                'jsonpCallback' : 'cb',
+                'success' : function(data, textStats, XMLHttpRequest) {
+                    console.log(data);
+                    //$("body").append(output);
+                }
+            });
+
+        </script>
+	<!--
+	<script>
+		<!-- JavaScript Goes Here!
+		(function() {
+			var MAPS_API_KEY = "AIzaSyBh7sMyzmaE608_MhYGiJw8VpelRqlHd7s";
+			var YELP_API_KEY = "I0ePdTYpPAm6T-0YMH0s0Q";
+			var YELP_URL = "http://api.yelp.com/v2/search?";
+			var FANDANGO_API_KEY = "m5krwg43jnhr7ud9knyqdpcp";
+			var ROULETTE_URL = "http://netflixroulette.net/api/api.php?";
+			
+			window.onload = init;
+			
+			function init() {
+				document.querySelector(#search).onclick = doSearch;
+			}
+			
+			function doRestaurantSearch(){
+				var url = YELP_URL;
+				url += "location=";
+				
+				// get value of form field
+				var value = document.querySelector("#searchterm").value;
+			
+				// get rid of any leading and trailing spaces
+				value = value.trim();
+			}
+			
+			function doMovieSearch(){
+				var url = ROULETTE_URL;
+				url += "location=";
+				
+				// get value of form field
+				var value = document.querySelector("#zipcode").value;
+			
+				// get rid of any leading and trailing spaces
+				value = value.trim();
+				
+				// if there's no band to search then bail out of the function (return does this)
+				if(value.length < 1) return;
+				
+				document.querySelector("#dynamicContent").innerHTML = "<b>Searching for " + value + "</b>";
+				// replace spaces the user typed in the middle of the term with %20
+				// %20 is the hexadecimal value for a space
+				value = encodeURI(value); 
+				
+				// finally, add the artist name to the end of the string
+				url += value;
+				
+				// call the web service, and download the file
+				console.log("loading " + url);
+				$("#dynamicContent").fadeOut(250);
+				$.getJSON(url).done(function(data){eventJsonLoaded(data);});
+			}
+		}())
+	</script>
+	-->
 </head>
 <body>
+<div class="restaurants">
+	<div id="staticContent">
+		<p>Location (Zipcode)</p>
+		<form>
+			<input id="zipcode" type="text" name="zipcode" value="Zipcode" maxlength="5">
+		</form>
+		<p>Distance (Miles)</p>
+		<!-- yelp deals with radius in meters, so 40000 meters is 25 miles, which is the max we can search -->
+		<select id="distance">
+			<option value="5">5</option>
+			<option value="10">10</option>
+			<option value="15">15</option>
+			<option value="20">20</option>
+			<option value="40000">25</option>
+		</select>
+		<p>Cuisine</p>
+		<select id="cuisine">
+			<option value="american">American</option>
+			<option value="italian">Italian</option>
+			<option value="greek">Greek</option>
+			<option value="chinese">Chinese</option>
+			<option value="mexican">Mexican</option>
+			<option value="japanese">Japanese</option>
+			<option value="unspecified">Unspecified</option>
+		</select>
+	</div>
+	<br>
+	<div id="dynamicContent">
+		<p>Thar's no data here mate!</p>
+	</div>
+</div>
+
+<div class="movies">
+	<div id="staticContent">
+		<p>Search Keyword</p>
+		<form>
+			<input id="keyword" type="text" name="keyword" value="Keyword">
+		</form>
+		<p>Genre</p>
+		<select id="genre">
+			<option value="anime">Anime</option>
+			<option value="action">Action</option>
+			<option value="comedy">Comedy</option>
+			<option value="thriller">Thriller</option>
+		</select>
+		<p>Rating</p>
+		<select id="rating">
+			<option value="5">5</option>
+			<option value="4">4 & up</option>
+			<option value="3">3 & up</option>
+			<option value="2">2 & up</option>
+			<option value="1">1 & up</option>
+			<option value="0">0 & up</option>
+		</select>
+	</div>
+	<br>
+	<div id="dynamicContent">
+		<p>Thar's no data here mate!</p>
+	</div>
+</div>
+
+<input id="search" type="submit" value="Submit">
 </body>
 </html>
